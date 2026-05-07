@@ -1,6 +1,7 @@
-.table
+## VIEW all tables in dataframe
+.table 
 
-# DISTINCT
+## DISTINCT -- 
 SELECT DISTINCT Location
     FROM Site
     ORDER BY Location
@@ -138,8 +139,3 @@ SELECT * FROM Bird_nests BN JOIN Species S -- we are aliasing the tables to make
 
 -- if the primary key is the same name as the foreign key, you can use USING
 SELECT * FROM Bird_nests JOIN Bird_eggs USING (Nest_ID)
-
-
-
-
-

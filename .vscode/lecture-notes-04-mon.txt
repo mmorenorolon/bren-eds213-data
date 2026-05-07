@@ -1,0 +1,178 @@
+1. Tri-value logic (TRUE, FALSE… and a weird third one)
+
+Think of SQL like asking questions about a list.
+
+Normally:
+
+TRUE = yes ✅
+FALSE = no ❌
+
+But SQL also has:
+
+NULL = “I don’t know” 🤷‍♀️
+
+Example:
+
+“Is age < 7?”
+
+- If age = 5 → TRUE
+- If age = 10 → FALSE
+- If age = NULL → 🤷‍♀️ (unknown)
+
+👉 Important rule:
+SQL only keeps rows that are TRUE
+FALSE and NULL both get ignored.
+
+That’s why this query misses rows:
+
+WHERE floatAge < 7 OR floatAge >= 7;
+
+Because NULL doesn’t satisfy either side
+
+👉 Fix:
+
+WHERE floatAge IS NULL 
+
+2. Everything is a table (this is a big mindset shift)
+
+In SQL:
+
+EVERYTHING is a table—even results.
+
+So you can do this:
+
+SELECT * FROM (
+  SELECT Location, MAX(Area) AS Max_area
+  FROM Site
+  GROUP BY Location
+)
+WHERE Max_area > 200;
+
+Translation:
+
+- First make a mini table
+- Then filter it
+
+3. Joins (combining tables)
+
+Think of two LEGO sets 🧱
+
+A JOIN = snapping them together
+
+The idea:
+
+SQL:
+
+1. Combines everything (like dumping both boxes together)
+2. Then filters what matches
+
+Types of joins:
+
+INNER JOIN (default)
+👉 Only keeps matches
+
+LEFT JOIN
+👉 Keeps everything on the left + matches
+(missing matches = NULL)
+
+RIGHT JOIN
+👉 Keeps everything on the right
+
+FULL JOIN
+👉 Keeps everything from both sides
+
+Example:
+
+SELECT * FROM Student JOIN House USING (House_ID);
+
+👉 Translation:
+“Attach house info to each student”
+
+4. GROUP BY (counting things)
+
+This is like sorting toys into bins.
+
+Example:
+
+SELECT Nest_ID, COUNT(*)
+FROM Bird_eggs
+GROUP BY Nest_ID;
+
+👉 Translation:
+“Count how many eggs per nest”
+
+
+⚠️ Gotcha:
+You can’t randomly add columns unless you:
+
+- group by them OR
+- use something like ANY_VALUE()
+
+
+5. Views (saved queries)
+
+A view is like:
+
+saving a query as a shortcut
+
+CREATE VIEW v AS SELECT ...
+
+👉 Think:
+
+Not a real table
+Just runs the query every time
+
+
+6. Temporary tables
+CREATE TEMP TABLE ...
+
+👉 Think:
+
+- Real table
+- But temporary
+- Like scratch paper
+
+
+
+7. Set operations (combining results)
+
+These are like math with lists:
+
+UNION
+
+- Combine results (no duplicates)
+
+UNION ALL
+
+- Combine results (keep duplicates)
+
+INTERSECT
+
+- Only what both have
+
+EXCEPT
+
+- “What’s in A but NOT in B”
+
+Example:
+
+SELECT Code FROM Species
+EXCEPT
+SELECT Species FROM Bird_nests;
+
+👉 Translation:
+“Give me species with NO nests”
+
+
+8. Three ways to do the same thing (important mindset)
+
+Example: “Species with no nests”
+
+You saw 3 ways:
+
+1. NOT IN
+2. JOIN ... IS NULL
+3. EXCEPT
+
+👉 This is important:
+SQL is flexible—same problem, multiple solutions

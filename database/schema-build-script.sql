@@ -6,7 +6,7 @@ CREATE TABLE Species (
     Scientific_name VARCHAR, -- can't make NOT NULL, missing data in some rows
     Relevance VARCHAR
 );
-COPY Species FROM 'species.csv' (header TRUE);
+COPY Species FROM 'ASDN_csv/species.csv' (header TRUE);
 
 CREATE TABLE Site (
     Code VARCHAR PRIMARY KEY,
@@ -17,13 +17,13 @@ CREATE TABLE Site (
     Area FLOAT NOT NULL CHECK (Area > 0),
     UNIQUE (Latitude, Longitude)
 );
-COPY Site FROM 'site.csv' (header TRUE);
+COPY Site FROM '../ASDN_csv/site.csv' (header TRUE);
 
 CREATE TABLE Personnel (
     Abbreviation VARCHAR PRIMARY KEY,
     Name VARCHAR UNIQUE NOT NULL
 );
-COPY Personnel FROM 'personnel.csv' (header TRUE);
+COPY Personnel FROM '../ASDN_csv/personnel.csv' (header TRUE);
 
 CREATE TABLE Camp_assignment (
     Year INTEGER NOT NULL CHECK (Year BETWEEN 1950 AND 2015),
@@ -37,7 +37,7 @@ CREATE TABLE Camp_assignment (
     CHECK (Start BETWEEN (Year||'-01-01')::DATE AND (Year||'-12-31')::DATE),
     CHECK ("End" BETWEEN (Year||'-01-01')::DATE AND (Year||'-12-31')::DATE)
 );
-COPY Camp_assignment FROM 'ASDN_Camp_assignment.csv' (header TRUE);
+COPY Camp_assignment FROM '../ASDN_csv/ASDN_Camp_assignment.csv' (header TRUE);
 
 CREATE TABLE Bird_nests (
     Book_page VARCHAR,
@@ -59,7 +59,7 @@ CREATE TABLE Bird_nests (
     FOREIGN KEY (Species) REFERENCES Species (Code),
     FOREIGN KEY (Observer) REFERENCES Personnel (Abbreviation)
 );
-COPY Bird_nests FROM 'ASDN_Bird_nests.csv' (header TRUE);
+COPY Bird_nests FROM '../ASDN_csv/ASDN_Bird_nests.csv' (header TRUE);
 
 CREATE TABLE Bird_eggs (
     Book_page VARCHAR,
@@ -73,4 +73,4 @@ CREATE TABLE Bird_eggs (
     FOREIGN KEY (Site) REFERENCES Site (Code),
     FOREIGN KEY (Nest_ID) REFERENCES Bird_nests (Nest_ID)
 );
-COPY Bird_eggs FROM 'ASDN_Bird_eggs.csv' (header TRUE);
+COPY Bird_eggs FROM '../ASDN_csv/ASDN_Bird_eggs.csv' (header TRUE);
