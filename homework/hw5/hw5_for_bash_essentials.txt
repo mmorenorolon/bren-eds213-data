@@ -1,0 +1,113 @@
+Be sure to cd to the class data GitHub repository, for_bash_essentials subdirectory, before answering these!!
+
+1. Compare the output of these three commands:
+
+ls
+ls .
+ls "$(pwd)/../for_bash_essentials"
+
+Explain why you see what you see, and explain what processing Bash is doing in the third command.
+
+
+*Answer*: We see the same output for the first two commands, and the processing is slightly different for each. 
+`ls` alone lists all contents of the current directory. ls . explicitly lists the contents of the directory represented 
+by `.`, which is also the current directory. `ls "$(pwd)/../for_bash_essentials"` does not achieve the same output. Instead, 
+it lists the contents of a different directory, which is the one located at the absolute path formed by `$(pwd)/../for_bash_essentials`. 
+Bash first performs command substitution (`$(pwd)`), then constructs the full path, resolves `..`, and passes the resulting directory 
+path to `ls`. This means that the third command only shows the same output as the first two if your current working directory happens 
+to be the parent of `for_bash_essentials`, which is not generally the case. 
+
+
+2. Try the following two commands:
+
+wc -l *.csv
+cat *.csv | wc -l
+
+The first prints filenames and line counts. The second prints a bare number. Why does it print that number, and why does it not print any filenames?
+
+*Answer*: The second prints that number because cat concatenates all the CSV files and sends the combined stream of lines into wc -l, so wc counts the total number of lines across all files.
+
+It does not print any filenames because when `wc` receives input from a pipe, it treats the input as coming from 
+standard input, not from named files. `wc` only prints filenames when it is given filenames as arguments, which 
+does not happen in the piped version. 
+
+
+3. You want to count the total number of lines in all CSV files and try this command:
+
+cat *.csv | wc -l a.csv
+
+What happens and why?
+
+*Answer*: The command does not count the total number of lines across all CSV files. Even though `cat *.csv` 
+sends the contents of all CSV files through the pipe, `wc` is also given a filename argument, `a.csv`. When `wc` 
+receives a filename, it counts that file instead of reading from standard input.
+
+4. You’re given
+
+`name=Moe`
+
+and you’d like to print “Moe_Howard”. You try this:
+
+echo "$name_Howard"
+
+but that doesn’t quite work. What fix can you apply to $name, while keeping it inside the quotation marks, to make this command give the desired effect? (Refer back to section 3.)
+
+*Answer*: The fix is to apply braces to delimit the variable name like so:
+          echo "${name}_Howard" which outputs Moe_Howard 
+
+5. You create a script and run it like so:
+
+bash myscript.sh *.csv
+
+What are the values of variables $1 and $#? Explain why the script does not see just one argument passed to it.
+
+*Answer*: $1 is the first filename that matches *.csv, such as `a.csv`. `$#` is the number of arguments passed to 
+the script, which is the number of .csv files in the current directory (5). The script does not see just one argument 
+because the shell expands `*.csv` before running the script. So instead of receiving the literal argument `*.csv`,
+the script receives each matching CSV filename as a separate argument.
+
+6. You create a script and run it like so:
+
+bash myscript.sh "$(date)" $(date)
+
+In your script, what are the values of variables $1 and $3?
+
+`$1` is the full output of the first date command because "$(date)" is quoted, so Bash treats it as one argument. 
+`$3` is May because the second $(date) is unquoted, so its output is split into separate arguments at spaces. 
+In this case, `$2` is Fri, and `$3` is May.
+
+7. Create a file you don’t care about (because you’re about to destroy it):
+
+echo "yo ho a line of text" > junk_file.txt
+echo "another line" >> junk_file.txt
+
+You want to sort the lines in this file, so you try:
+
+sort junk_file.txt
+
+Well that prints the lines in sorted order, but it doesn’t actually change the file. You recall section 7 and try:
+
+sort junk_file.txt > junk_file.txt
+
+What happens and why? How can you sort the lines in your file? (Hint: it involves creating a second file and using mv.)
+
+*Answer*: With that command, Bash overwrote the existing file with an empty text file before the program was
+run, and we lost whatever lines we had. To sort the file safely, we should write the sorted output to a second file
+first, then use `mv` to replace the original file, like so: 
+
+    sort junk_file.txt > sorted_junk_file.txt
+    mv sorted_junk_file.txt junk_file.txt
+
+This works because sort reads from the original `junk_file.txt` while writing the sorted result to a different file. 
+After that, `mv` replaces the original file with the sorted version.
+
+
+8. You want to delete all files ending in .csv, so you type (don’t actually try this):
+
+rm * .csv
+
+but as can be seen, your thumb accidentally hit the space bar and you got an extra space in there. What will rm do in this case?
+
+*Answer*: The * expands to all non-hidden files in the current directory, so rm will try to delete all of those 
+files. Then it will also try to remove a file literally named `.csv`. If no such file exists, it will print an 
+error for `.csv`, but the bigger problem is that the * may have already caused many files to be deleted. 
