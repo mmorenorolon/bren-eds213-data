@@ -1,0 +1,16 @@
+
+# Who Were the Winners?
+
+```{r}
+library(tidyverse)
+library(DBI)
+library(dbplyr)
+library(duckdb)
+
+conn <- DBI::dbConnect(duckdb::duckdb(),
+    dbdir = "database.duckdb"
+)
+
+DBI::dbListTables(conn)
+```
+
