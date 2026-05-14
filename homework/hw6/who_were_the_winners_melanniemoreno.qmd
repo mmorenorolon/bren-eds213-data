@@ -2,6 +2,7 @@
 # Who Were the Winners?
 
 ```{r}
+# Create database connection
 library(tidyverse)
 library(DBI)
 library(dbplyr)
@@ -14,3 +15,66 @@ conn <- DBI::dbConnect(duckdb::duckdb(),
 DBI::dbListTables(conn)
 ```
 
+## Reference tables
+
+
+```{r}
+# Call the nests, eggs, and personnel tables in a lazy dataframe
+nests_db <- tbl(conn, "Bird_nests")
+eggs_db <- tbl(conn, "Bird_eggs")
+personnel_db <- tbl(conn, "Personnel")
+
+nests_db
+eggs_db
+personnel_db
+```
+
+
+Use dbplyer to execute the following query:
+
+SELECT Name, COUNT(Egg_num) AS total_eggs
+FROM Bird_eggs
+JOIN Bird_nests USING (Nest_ID)
+JOIN Personnel ON Personnel.Abbreviation = Bird_nests.Observer
+GROUP BY Name
+ORDER BY total_eggs DESC
+LIMIT 3;
+
+## Display the query that `dbplyr` generates
+```{r}
+eggs_db |>
+    inner_join(nests_db, by = "Nest_ID") |>
+    inner_join(personnel_db,
+        by = c("Observer" = "Abbreviation")
+    ) |>
+    select(Name, Egg_num) |>
+    group_by(Name) |>
+    summarise(total_eggs = count(Egg_num)) |>
+    arrange(desc(total_eggs)) |>
+    head(3) |>
+    show_query()
+```
+
+```{r}
+# Save the query as a df
+top_observers <- eggs_db |>
+    inner_join(nests_db, by = "Nest_ID") |>
+    inner_join(personnel_db,
+        by = c("Observer" = "Abbreviation")
+    ) |>
+    select(Name, Egg_num) |>
+    group_by(Name) |>
+    summarise(total_eggs = count(Egg_num)) |>
+    arrange(desc(total_eggs)) |>
+    head(3) |>
+    collect()
+
+top_observers
+```
+
+Here, `dbplyr ` did not create a new table, but executed the codeblock in one query.
+
+## Close the connection
+```{r}
+DBI::dbDisconnect(conn, shutdown = TRUE)
+```
